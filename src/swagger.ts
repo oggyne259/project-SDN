@@ -1,0 +1,149 @@
+import swaggerUi from 'swagger-ui-express'
+import swaggerJsdoc from 'swagger-jsdoc'
+import { Express } from 'express'
+import path from 'path'
+
+const swaggerOptions: swaggerJsdoc.Options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express TS API',
+      version: '1.0.0',
+      description: 'Swagger for Express + TypeScript'
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Local server'
+      },
+      {
+        url: 'https://final-project-tawny-two-47.vercel.app',
+        description: 'Production server'
+      }
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      },
+      schemas: {
+        Product: {
+          type: 'object',
+          properties: {
+            handbagName: { type: 'string' },
+            cost: { type: 'number' },
+            category: { type: 'string' },
+            color: {
+              type: 'array',
+              items: { type: 'string' }
+            },
+            gender: { type: 'boolean' },
+            uri: { type: 'string' },
+            brand: { type: 'string' },
+            percentOff: { type: 'number' }
+          }
+        },
+
+        Perfume: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            perfumeName: { type: 'string' },
+            uri: { type: 'string' },
+            price: { type: 'number' },
+            concentration: { type: 'string' },
+            description: { type: 'string' },
+            ingredients: { type: 'string' },
+            volume: { type: 'number' },
+            targetAudience: { type: 'string' },
+            brand: { type: 'string' }
+          }
+        },
+
+        PerfumeReqBody: {
+          type: 'object',
+          required: [
+            'perfumeName',
+            'uri',
+            'price',
+            'concentration',
+            'description',
+            'ingredients',
+            'volume',
+            'targetAudience',
+            'brand'
+          ],
+          properties: {
+            perfumeName: { type: 'string' },
+            uri: { type: 'string' },
+            price: { type: 'number' },
+            concentration: { type: 'string' },
+            description: { type: 'string' },
+            ingredients: { type: 'string' },
+            volume: { type: 'number' },
+            targetAudience: { type: 'string' },
+            brand: { type: 'string' }
+          }
+        },
+
+        UpdatePerfumeReqBody: {
+          type: 'object',
+          properties: {
+            perfumeName: { type: 'string' },
+            uri: { type: 'string' },
+            price: { type: 'number' },
+            concentration: { type: 'string' },
+            description: { type: 'string' },
+            ingredients: { type: 'string' },
+            volume: { type: 'number' },
+            targetAudience: { type: 'string' },
+            brand: { type: 'string' }
+          }
+        },
+
+        Brand: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string' },
+            name: { type: 'string' },
+            description: { type: 'string' },
+            logo: { type: 'string' },
+            createdAt: {
+              type: 'string',
+              format: 'date-time'
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        }
+      }
+    },
+    security: [
+      {
+        bearerAuth: []
+      }
+    ]
+  },
+  apis: [path.join(__dirname, 'routes/*.ts'), path.join(__dirname, 'routes/*.js')] // .ts local, .js on Vercel (compiled)
+}
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions)
+
+export default function setupSwagger(app: Express) {
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css',
+      customJs: [
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.min.js'
+      ]
+    })
+  )
+}
