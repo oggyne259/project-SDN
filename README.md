@@ -205,4 +205,4 @@ npm run prettier:fix # Tự động format code
 
 ## 👨‍💻 Tác giả
 
-**SDN team
+**Trần Hữu Phước** – [@HuuFuoc](https://github.com/HuuFuoc)
