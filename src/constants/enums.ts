@@ -6,7 +6,15 @@ export enum UserVerifyStatus {
 export enum USER_ROLE {
   Admin,
   Staff,
-  User
+  User,
+  Instructor
+}
+
+export enum InstructorRequestStatus {
+  None = 'none',
+  Pending = 'pending',
+  Approved = 'approved',
+  Rejected = 'rejected'
 }
 export enum TokenType {
   AccessToken,

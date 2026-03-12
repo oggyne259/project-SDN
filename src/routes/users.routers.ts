@@ -4,9 +4,12 @@ import {
   accessTokenValidator,
   changePasswordValidator,
   emailVerifyTokenValidator,
+  becomeInstructorValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
+  requireStaff,
+  reviewInstructorRequestValidator,
   updateMeValidator
 } from '../middlewares/users.middlewares'
 import {
@@ -16,6 +19,8 @@ import {
   loginController,
   logoutController,
   registerController,
+  requestBecomeInstructorController,
+  reviewInstructorRequestController,
   updateMeController
 } from '../controllers/users.controllers'
 import { wrapAsync } from '../utils/handlers'
@@ -263,5 +268,73 @@ userRouter.post('/get-me', accessTokenValidator, wrapAsync(getMeController))
  *         description: Dữ liệu không hợp lệ
  */
 userRouter.post('/update-me', accessTokenValidator, updateMeValidator, wrapAsync(updateMeController))
+
+
+/**
+ * @openapi
+ * /user/become-instructor:
+ *   post:
+ *     summary: Người dùng gửi yêu cầu trở thành giảng viên
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Gửi yêu cầu thành công
+ */
+userRouter.post(
+  '/become-instructor',
+  accessTokenValidator,
+  becomeInstructorValidator,
+  wrapAsync(requestBecomeInstructorController)
+)
+
+/**
+ * @openapi
+ * /user/instructor-request/{user_id}/review:
+ *   post:
+ *     summary: Staff duyệt yêu cầu trở thành giảng viên
+ *     tags:
+ *       - Users
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [approved, rejected]
+ *               review_note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Duyệt thành công
+ */
+userRouter.post(
+  '/instructor-request/:user_id/review',
+  requireStaff,
+  reviewInstructorRequestValidator,
+  wrapAsync(reviewInstructorRequestController)
+)
 
 export default userRouter

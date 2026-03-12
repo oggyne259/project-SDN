@@ -2,11 +2,13 @@ import { NextFunction, Request, Response } from 'express'
 import userService from '../services/users.services'
 import { ParamsDictionary } from 'express-serve-static-core'
 import {
+  BecomeInstructorReqBody,
   ChangePasswordReqBody,
   EmailVerifyReqQuery,
   loginReqBody,
   LogoutReqBody,
   RegisterReqBody,
+  ReviewInstructorRequestReqBody,
   TokenPayLoad,
   UpdateMeReqBody
 } from '../models/requests/User.requests'
@@ -127,5 +129,30 @@ export const updateMeController = async (
   return res.status(HTTP_STATUS.OK).json({
     message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESS,
     data: result
+  })
+}
+
+
+export const requestBecomeInstructorController = async (
+  req: Request<ParamsDictionary, any, BecomeInstructorReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user_id } = getAccessTokenPayload(req)
+  await userService.requestBecomeInstructor(user_id, req.body)
+  return res.status(HTTP_STATUS.OK).json({
+    message: USERS_MESSAGES.INSTRUCTOR_REQUEST_SUBMITTED
+  })
+}
+
+export const reviewInstructorRequestController = async (
+  req: Request<ParamsDictionary, any, ReviewInstructorRequestReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const user_id = String(req.params.user_id)
+  await userService.reviewInstructorRequest(user_id, req.body)
+  return res.status(HTTP_STATUS.OK).json({
+    message: USERS_MESSAGES.INSTRUCTOR_REQUEST_REVIEWED
   })
 }

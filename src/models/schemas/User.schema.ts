@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { USER_ROLE, UserVerifyStatus } from '../../constants/enums'
+import { InstructorRequestStatus, USER_ROLE, UserVerifyStatus } from '../../constants/enums'
 
 //interface dùng để định nghĩa 1 user cần những gì khi tạo ra
 interface UserType {
@@ -21,6 +21,11 @@ interface UserType {
   avatar?: string // optional
   cover_photo?: string // optional
   role?: USER_ROLE //đây là dạng Enum
+  instructor_request_status?: InstructorRequestStatus
+  instructor_request_reason?: string
+  instructor_request_review_note?: string
+  instructor_request_requested_at?: Date
+  instructor_request_reviewed_at?: Date
 }
 
 //class sẽ sử dụng các định nghĩa của interface để tạo user đầy đủ
@@ -44,6 +49,11 @@ export default class User {
   avatar: string
   cover_photo: string
   role: USER_ROLE
+  instructor_request_status: InstructorRequestStatus
+  instructor_request_reason: string
+  instructor_request_review_note: string
+  instructor_request_requested_at?: Date
+  instructor_request_reviewed_at?: Date
   constructor(user: UserType) {
     const date = new Date() //tạo này cho ngày created_at updated_at bằng nhau
     this._id = user._id || new ObjectId() // tự tạo id
@@ -64,5 +74,10 @@ export default class User {
     this.avatar = user.avatar || ''
     this.cover_photo = user.cover_photo || ''
     this.role = user.role || USER_ROLE.User
+    this.instructor_request_status = user.instructor_request_status || InstructorRequestStatus.None
+    this.instructor_request_reason = user.instructor_request_reason || ''
+    this.instructor_request_review_note = user.instructor_request_review_note || ''
+    this.instructor_request_requested_at = user.instructor_request_requested_at
+    this.instructor_request_reviewed_at = user.instructor_request_reviewed_at
   }
 }

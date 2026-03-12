@@ -5,7 +5,7 @@ import { USERS_MESSAGES } from '../constants/messages'
 import { ErrorWithStatus } from '../models/Error'
 import HTTP_STATUS from '../constants/httpStatus'
 import { verifyToken } from '../utils/jwt'
-import { USER_ROLE } from '../constants/enums'
+import { InstructorRequestStatus, USER_ROLE } from '../constants/enums'
 import { getAccessTokenPayload } from '../utils/jwt'
 import dotenv from 'dotenv'
 import { capitalize } from 'lodash'
@@ -144,6 +144,34 @@ delete updateNameSchema.notEmpty
 
 const updateDateOfBirthSchema: ParamSchema = { optional: true, ...dateOfBirthSchema }
 delete updateDateOfBirthSchema.notEmpty
+
+
+const becomeInstructorReasonSchema: ParamSchema = {
+  notEmpty: {
+    errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_REASON_IS_REQUIRED
+  },
+  isString: {
+    errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_REASON_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: {
+      min: 10,
+      max: 500
+    },
+    errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_REASON_LENGTH_MUST_BE_FROM_10_TO_500
+  }
+}
+
+const instructorRequestStatusSchema: ParamSchema = {
+  notEmpty: {
+    errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_STATUS_IS_INVALID
+  },
+  isIn: {
+    options: [[InstructorRequestStatus.Approved, InstructorRequestStatus.Rejected]],
+    errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_STATUS_IS_INVALID
+  }
+}
 
 export const loginValidator = validate(
   checkSchema(
@@ -284,7 +312,53 @@ export const updateMeValidator = validate(
   )
 )
 
+
+export const becomeInstructorValidator = validate(
+  checkSchema(
+    {
+      reason: becomeInstructorReasonSchema
+    },
+    ['body']
+  )
+)
+
+export const reviewInstructorRequestValidator = validate(
+  checkSchema(
+    {
+      status: instructorRequestStatusSchema,
+      review_note: {
+        optional: true,
+        isString: {
+          errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_REASON_MUST_BE_A_STRING
+        },
+        trim: true,
+        isLength: {
+          options: {
+            max: 500
+          },
+          errorMessage: USERS_MESSAGES.INSTRUCTOR_REQUEST_REASON_LENGTH_MUST_BE_FROM_10_TO_500
+        }
+      }
+    },
+    ['body']
+  )
+)
+
 export const requireUser = accessTokenValidator
+
+export const requireStaff = [
+  accessTokenValidator,
+  (req: Request, res: Response, next: NextFunction) => {
+    const payload = getAccessTokenPayload(req)
+    if (payload.role !== USER_ROLE.Admin && payload.role !== USER_ROLE.Staff) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBBIDEN,
+        message: USERS_MESSAGES.STAFF_PERMISSION_REQUIRED
+      })
+    }
+    next()
+  }
+]
 
 export const requireAdmin = [
   accessTokenValidator,

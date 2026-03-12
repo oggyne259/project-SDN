@@ -64,6 +64,16 @@ export const USERS_MESSAGES = {
     'Username must be a string and length must be 4 - 15, and contain only letters, numbers, and underscores, not only numbers',
   CHANGE_PASSWORD_SUCCESS: 'Change password success',
   REFRESH_TOKEN_SUCCESS: 'Refresh token successfully',
+  INSTRUCTOR_REQUEST_REASON_IS_REQUIRED: 'Instructor request reason is required',
+  INSTRUCTOR_REQUEST_REASON_MUST_BE_A_STRING: 'Instructor request reason must be a string',
+  INSTRUCTOR_REQUEST_REASON_LENGTH_MUST_BE_FROM_10_TO_500:
+    'Instructor request reason length must be from 10 to 500',
+  INSTRUCTOR_REQUEST_SUBMITTED: 'Instructor request submitted successfully',
+  INSTRUCTOR_REQUEST_ALREADY_PENDING: 'Instructor request is already pending',
+  INSTRUCTOR_REQUEST_NOT_FOUND: 'Instructor request not found',
+  INSTRUCTOR_REQUEST_STATUS_IS_INVALID: 'Instructor request status is invalid',
+  INSTRUCTOR_REQUEST_REVIEWED: 'Instructor request reviewed successfully',
+  STAFF_PERMISSION_REQUIRED: 'Staff permission required',
   INVALID_USER_ID: 'Invalid user id'
 } as const
 

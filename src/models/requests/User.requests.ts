@@ -1,5 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken'
-import { TokenType, USER_ROLE } from '~/constants/enums'
+import { InstructorRequestStatus, TokenType, USER_ROLE } from '~/constants/enums'
 import { ParsedQs } from 'qs'
 export interface RegisterReqBody {
   name: string
@@ -31,4 +31,14 @@ export interface ChangePasswordReqBody {
 export interface UpdateMeReqBody {
   name?: string
   date_of_birth?: string
+}
+
+
+export interface BecomeInstructorReqBody {
+  reason: string
+}
+
+export interface ReviewInstructorRequestReqBody {
+  status: InstructorRequestStatus.Approved | InstructorRequestStatus.Rejected
+  review_note?: string
 }

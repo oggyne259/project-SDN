@@ -1,8 +1,14 @@
 import bcrypt from 'bcryptjs' // Thêm dòng này
 import User from '../models/schemas/User.schema'
 import databaseService from './database.services'
-import { loginReqBody, RegisterReqBody, UpdateMeReqBody } from '../models/requests/User.requests'
-import { TokenType, USER_ROLE, UserVerifyStatus } from '../constants/enums'
+import {
+  BecomeInstructorReqBody,
+  loginReqBody,
+  RegisterReqBody,
+  ReviewInstructorRequestReqBody,
+  UpdateMeReqBody
+} from '../models/requests/User.requests'
+import { InstructorRequestStatus, TokenType, USER_ROLE, UserVerifyStatus } from '../constants/enums'
 import { signToken } from '../utils/jwt'
 import jwt, { sign } from 'jsonwebtoken'
 import { USERS_MESSAGES } from '../constants/messages'
@@ -259,6 +265,76 @@ class UserService {
       })
     }
     return user
+  }
+
+  
+  async requestBecomeInstructor(user_id: string, payload: BecomeInstructorReqBody) {
+    const user = await databaseService.users.findOne({
+      _id: new ObjectId(user_id)
+    })
+
+    if (!user) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: USERS_MESSAGES.USER_NOT_FOUND
+      })
+    }
+
+    if (user.role === USER_ROLE.Instructor) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: USERS_MESSAGES.INSTRUCTOR_REQUEST_STATUS_IS_INVALID
+      })
+    }
+
+    if (user.instructor_request_status === InstructorRequestStatus.Pending) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: USERS_MESSAGES.INSTRUCTOR_REQUEST_ALREADY_PENDING
+      })
+    }
+
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          instructor_request_status: InstructorRequestStatus.Pending,
+          instructor_request_reason: payload.reason,
+          instructor_request_review_note: '',
+          instructor_request_requested_at: new Date(),
+          instructor_request_reviewed_at: undefined,
+          updated_at: new Date()
+        }
+      }
+    )
+  }
+
+  async reviewInstructorRequest(user_id: string, payload: ReviewInstructorRequestReqBody) {
+    const user = await databaseService.users.findOne({
+      _id: new ObjectId(user_id)
+    })
+
+    if (!user || user.instructor_request_status !== InstructorRequestStatus.Pending) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: USERS_MESSAGES.INSTRUCTOR_REQUEST_NOT_FOUND
+      })
+    }
+
+    const isApproved = payload.status === InstructorRequestStatus.Approved
+
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          instructor_request_status: payload.status,
+          instructor_request_review_note: payload.review_note || '',
+          instructor_request_reviewed_at: new Date(),
+          role: isApproved ? USER_ROLE.Instructor : user.role,
+          updated_at: new Date()
+        }
+      }
+    )
   }
 
   async updateMe(user_id: string, payload: UpdateMeReqBody) {
